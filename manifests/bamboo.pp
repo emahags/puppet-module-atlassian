@@ -100,7 +100,6 @@ class atlassian::bamboo (
         mysql::db { $database_name:
           user             => $database_user,
           password         => $database_password_hash,
-          password_is_hash => true,
           host             => $database_server,
           grant            => 'ALL',
           charset          => 'utf8',
