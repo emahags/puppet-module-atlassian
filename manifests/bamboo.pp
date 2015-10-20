@@ -53,12 +53,12 @@ class atlassian::bamboo (
       name      => $service_name,
       enable    => $service_enable,
       provider  => $service_provider,
-      subscribe => [ File['server.xml'],
-                     File['setenv.sh'],],
+      subscribe => [ File['bamboo-server.xml'],
+                     File['bamboo-setenv.sh'],],
     }
   }
 
-  file { 'server.xml':
+  file { 'bamboo-server.xml':
     path    => $server_conf_path,
     ensure  => 'file',
     owner   => $user,
@@ -73,7 +73,7 @@ class atlassian::bamboo (
     content => template('atlassian/bamboo.init.erb'),
   }
 
-  file { 'setenv.sh':
+  file { 'bamboo-setenv.sh':
     path => $setenv_path,
     owner => $user,
     group => $group,

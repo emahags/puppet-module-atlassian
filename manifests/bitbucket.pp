@@ -53,12 +53,12 @@ class atlassian::bitbucket (
       name      => $service_name,
       enable    => $service_enable,
       provider  => $service_provider,
-      subscribe => [ File['server.xml'],
-                     File['setenv.sh'],],
+      subscribe => [ File['bitbucket-server.xml'],
+                     File['bitbucket-setenv.sh'],],
     }
   }
 
-  file { 'server.xml':
+  file { 'bitbucket-server.xml':
     path    => $server_conf_path,
     ensure  => 'file',
     owner   => $user,
@@ -67,7 +67,7 @@ class atlassian::bitbucket (
     content => template('atlassian/bitbucket-server.xml.erb'),
   }
 
-  file { 'setenv.sh':
+  file { 'bitbucket-setenv.sh':
     path => $setenv_path,
     owner => $user,
     group => $group,
