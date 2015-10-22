@@ -35,10 +35,21 @@ class atlassian::bamboo (
   $alias                        = 'bamboo',
   $proxy_port                   = '80',
   $proxy_ssl                    = true,
-  $proxy_ssl_cert               = "/etc/pki/tls/certs/${alias}.crt",
-  $proxy_ssl_key                = "/etc/pki/tls/private/${alias}.key",
   $proxy_ssl_port               = '443',
+  $proxy_ssl_cert               = 'USE_DEFAULTS',
+  $proxy_ssl_key                = 'USE_DEFAULTS',
 ) {
+
+  if $proxy_ssl_cert == 'USE_DEFAULTS' {
+    $proxy_ssl_cert_real = "/etc/pki/tls/certs/${atlassian::bamboo::alias}.crt"
+  } else {
+    $proxy_ssl_cert_real = $proxy_ssl_cert
+  }
+  if $proxy_ssl_key == 'USE_DEFAULTS' {
+    $proxy_ssl_key_real = "/etc/pki/tls/private/${atlassian::bamboo::alias}.key"
+  } else {
+    $proxy_ssl_key_real = $proxy_ssl_key
+  }
 
   if $manage_package {
     package { 'bamboo':
@@ -95,18 +106,10 @@ class atlassian::bamboo (
 
   if $manage_database {
     if $database_provider == 'mysql' {
-      if $database_password_hash {
-        include atlassian::mysql
-        mysql::db { $database_name:
-          user             => $database_user,
-          password         => $database_password_hash,
-          host             => $database_server,
-          grant            => 'ALL',
-          charset          => 'utf8',
-          collate          => 'utf8_bin',
-        }
-      } else {
-        fail("You must set a password hash")
+      atlassian::mysql { $database_name:
+        user           => $database_user,
+        password       => $database_password_hash,
+        server         => $database_server,
       }
     } else {
       fail("${database_provider} is not a valid database provider.")
@@ -115,40 +118,14 @@ class atlassian::bamboo (
 
   if $manage_proxy {
     if $proxy_provider == 'apache' {
-      include atlassian::apache
-      if $proxy_ssl {
-        apache::vhost { "${alias}":
-          servername    => "${alias}.${domain}",
-          port          => $proxy_port,
-          docroot       => '/var/www/html/',
-          redirect_dest => "https://${alias}.${domain}:${proxy_ssl_port}/",
-        }
-        apache::vhost { "${alias}-ssl":
-          servername          => "${alias}.${domain}",
-          port                => $proxy_ssl_port,
-          docroot             => '/var/www/html/',
-          ssl                 => true,
-          ssl_cert            => $proxy_ssl_cert,
-          ssl_key             => $proxy_ssl_key,
-          ssl_proxyengine     => true,
-          proxy_preserve_host => true,
-          proxy_pass          => [
-            { 'path' => '/',
-              'url' => "http://${alias}.${domain}:${port}/",
-            },
-          ],
-        }
-      } else {
-        apache::vhost { "${alias}":
-          servername => "${alias}.${domain}",
-          port       => $proxy_port,
-          docroot    => '/var/www/html/',
-          proxy_pass => [
-            { 'path' => '/',
-              'url'  => "http://${alias}.${domain}:${port}/",
-            },
-          ],
-        }
+      atlassian::apache { $alias:
+        server_alias   => $alias,
+        port           => $port,
+        proxy_ssl      => $proxy_ssl,
+        proxy_port     => $proxy_port,
+        proxy_ssl_port => $proxy_ssl_port,
+        proxy_ssl_cert => $proxy_ssl_cert_real,
+        proxy_ssl_key  => $proxy_ssl_key_real,
       }
     } else {
       fail("${proxy_provider} is not a valid proxy provider.")
