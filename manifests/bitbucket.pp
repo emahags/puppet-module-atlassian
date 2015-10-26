@@ -76,6 +76,7 @@ class atlassian::bitbucket (
     group   => $group,
     mode    => '0644',
     content => template('atlassian/bitbucket-server.xml.erb'),
+    require => Package['bitbucket'],
   }
 
   file { 'bitbucket-setenv.sh':
@@ -84,6 +85,7 @@ class atlassian::bitbucket (
     group => $group,
     mode => '0755',
     content => template('atlassian/bitbucket-setenv.sh.erb'),
+    require => Package['bitbucket'],
   }
 
   if $manage_package and $manage_service {
@@ -95,6 +97,7 @@ class atlassian::bitbucket (
       ensure => 'link',
       path   => $log_path,
       target => $log_target,
+      require => Package['bitbucket'],
     }
   }
 

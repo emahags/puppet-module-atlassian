@@ -78,6 +78,7 @@ class atlassian::jira (
     group   => $group,
     mode    => '0644',
     content => template('atlassian/jira-server.xml.erb'),
+    require => Package['jira'],
   }
 
   file { 'jira-setenv.sh':
@@ -86,6 +87,7 @@ class atlassian::jira (
     group => $group,
     mode => '0755',
     content => template('atlassian/jira-setenv.sh.erb'),
+    require => Package['jira'],
   }
 
   if $manage_package and $manage_service {
@@ -97,6 +99,7 @@ class atlassian::jira (
       ensure => 'link',
       path   => $log_path,
       target => $log_target,
+      require => Package['jira'],
     }
   }
 
@@ -104,6 +107,7 @@ class atlassian::jira (
     file { "/var/atlassian/application-data/jira/import/mail/${name}":
       ensure => directory,
       mode   => 0777,
+      require => File['/var/atlassian/application-data/jira/import/mail'],
     }
   }
 

@@ -76,6 +76,7 @@ class atlassian::confluence (
     group   => $group,
     mode    => '0644',
     content => template('atlassian/confluence-server.xml.erb'),
+    require => Package['confluence'],
   }
 
   file { 'confluence-setenv.sh':
@@ -84,6 +85,7 @@ class atlassian::confluence (
     group => $group,
     mode => '0755',
     content => template('atlassian/confluence-setenv.sh.erb'),
+    require => Package['confluence'],
   }
 
   if $manage_package and $manage_service {
@@ -95,6 +97,7 @@ class atlassian::confluence (
       ensure => 'link',
       path   => $log_path,
       target => $log_target,
+      require => Package['confluence'],
     }
   }
 

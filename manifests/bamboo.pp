@@ -76,12 +76,14 @@ class atlassian::bamboo (
     group   => $group,
     mode    => '0644',
     content => template('atlassian/bamboo-server.xml.erb'),
+    require => Package['bamboo'],
   }
 
   file { '/etc/init.d/bamboo':
     ensure => 'file',
     mode => '0755',
     content => template('atlassian/bamboo.init.erb'),
+    require => Package['bamboo'],
   }
 
   file { 'bamboo-setenv.sh':
@@ -90,6 +92,7 @@ class atlassian::bamboo (
     group => $group,
     mode => '0755',
     content => template('atlassian/bamboo-setenv.sh.erb'),
+    require => Package['bamboo'],
   }
 
   if $manage_package and $manage_service {
@@ -101,6 +104,7 @@ class atlassian::bamboo (
       ensure => 'link',
       path   => $log_path,
       target => $log_target,
+      require => Package['bamboo'],
     }
   }
 
