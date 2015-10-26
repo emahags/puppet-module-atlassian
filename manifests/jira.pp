@@ -115,21 +115,21 @@ class atlassian::jira (
     file { "/var/atlassian/application-data/jira":
       ensure => 'directory',
       mode => '0755',
-      owner => $owner,
+      owner => $user,
       group => $group,
       require => Package['jira'],
     }
     file { "/var/atlassian/application-data/jira/import":
       ensure => 'directory',
       mode => '0755',
-      owner => $owner,
+      owner => $user,
       group => $group,
       require => File['/var/atlassian/application-data/jira'],
     }
     file { "/var/atlassian/application-data/jira/import/mail":
       ensure => 'directory',
       mode => '0755',
-      owner => $owner,
+      owner => $user,
       group => $group,
       require => File['/var/atlassian/application-data/jira/import'],
     }
