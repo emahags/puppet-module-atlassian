@@ -18,6 +18,7 @@ class atlassian::jira (
 
   $server_conf_path             = '/usr/share/atlassian/jira/conf/server.xml',
   $setenv_path                  = '/usr/share/atlassian/jira/bin/setenv.sh',
+  $user_path                    = '/usr/share/atlassian/jira/bin/user.sh',
 
   $symlink_logs                 = true,
   $log_path                     = '/var/atlassian/application-data/jira/logs',
@@ -87,6 +88,15 @@ class atlassian::jira (
     group => $group,
     mode => '0755',
     content => template('atlassian/jira-setenv.sh.erb'),
+    require => Package['jira'],
+  }
+
+  file { 'user.sh':
+    path    => $user_path,
+    owner   => $user,
+    group   => $group,
+    mode    => '0755',
+    content => template('atlassian/jira-user.sh.erb'),
     require => Package['jira'],
   }
 
