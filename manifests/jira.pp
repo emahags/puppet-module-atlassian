@@ -9,7 +9,8 @@ class atlassian::jira (
   $service_enable               = true,
   $service_provider             = 'init',
 
-  $port                         = '8080',
+  $port                         = undef,
+  $sslport                      = '8080',
   $user                         = 'jira',
   $group                        = 'jira',
   $jvm_min_memory               = '1024m',
@@ -19,6 +20,8 @@ class atlassian::jira (
   $server_conf_path             = '/usr/share/atlassian/jira/conf/server.xml',
   $setenv_path                  = '/usr/share/atlassian/jira/bin/setenv.sh',
   $user_path                    = '/usr/share/atlassian/jira/bin/user.sh',
+  $confdir                      = '/usr/share/atlassian/jira/conf',
+  $workdir                      = '/usr/share/atlassian/jira/work',
 
   $symlink_logs                 = true,
   $log_path                     = '/var/atlassian/application-data/jira/logs',
@@ -104,6 +107,14 @@ class atlassian::jira (
     Package['jira'] -> Service['jira']
   }
 
+  file { 'jira-log-path':
+    ensure  => 'directory',
+    path    => $log_target,
+    owner   => $user,
+    group   => $group,
+    require => Package['jira'],
+  }
+
   if $symlink_logs {
     file { 'jira-log-source':
       ensure => 'link',
@@ -111,6 +122,22 @@ class atlassian::jira (
       target => $log_target,
       require => Package['jira'],
     }
+  }
+
+  file { 'confdir':
+    ensure  => 'directory',
+    path    => $confdir,
+    owner   => $user,
+    group   => $group,
+    require => Package[jira],
+  }
+
+  file { 'workdir':
+    ensure  => 'directory',
+    path    => $workdir,
+    owner   => $user,
+    group   => $group,
+    require => Package[jira],
   }
 
   define jiramaildir {
@@ -160,14 +187,28 @@ class atlassian::jira (
 
   if $manage_proxy {
     if $proxy_provider == 'apache' {
-      atlassian::apache { $alias:
-        server_alias   => $alias,
-        port           => $port,
-        proxy_ssl      => $proxy_ssl,
-        proxy_port     => $proxy_port,
-        proxy_ssl_port => $proxy_ssl_port,
-        proxy_ssl_cert => $proxy_ssl_cert_real,
-        proxy_ssl_key  => $proxy_ssl_key_real,
+      if $sslport {
+        atlassian::apache { $alias:
+          server_alias   => $alias,
+          port           => $sslport,
+          proxy_ssl      => $proxy_ssl,
+          proxy_port     => $proxy_port,
+          proxy_ssl_port => $proxy_ssl_port,
+          proxy_ssl_cert => $proxy_ssl_cert_real,
+          proxy_ssl_key  => $proxy_ssl_key_real,
+        }
+      } elsif $port {
+        atlassian::apache { $alias:
+          server_alias   => $alias,
+          port           => $port,
+          proxy_ssl      => $proxy_ssl,
+          proxy_port     => $proxy_port,
+          proxy_ssl_port => $proxy_ssl_port,
+          proxy_ssl_cert => $proxy_ssl_cert_real,
+          proxy_ssl_key  => $proxy_ssl_key_real,
+        }
+      } else {
+        fail("You need to have a port specified")
       }
     } else {
       fail("${proxy_provider} is not a valid proxy provider.")

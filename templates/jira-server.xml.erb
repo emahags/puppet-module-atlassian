@@ -8,7 +8,8 @@
     <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
 
     <Service name="Catalina">
-        <Connector port="<%= @port %>"
+<% if @sslport -%>
+        <Connector port="<%= @sslport %>"
                    maxThreads="150"
                    minSpareThreads="25"
                    connectionTimeout="20000"
@@ -22,8 +23,10 @@
                    secure="true"
                    acceptCount="100"
                    disableUploadTimeout="true"/>
+<% end -%>
+<% if @port -%>
 
-        <Connector port="8081"
+        <Connector port="<%= @port %>"
                    maxThreads="150"
                    minSpareThreads="25"
                    connectionTimeout="20000"
@@ -33,6 +36,7 @@
                    useBodyEncodingForURI="true"
                    acceptCount="100"
                    disableUploadTimeout="true"/>
+<% end -%>
 
         <Engine name="Catalina" defaultHost="localhost">
             <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
