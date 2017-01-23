@@ -123,6 +123,39 @@ class atlassian::confluence (
         proxy_ssl_port => $proxy_ssl_port,
         proxy_ssl_cert => $proxy_ssl_cert_real,
         proxy_ssl_key  => $proxy_ssl_key_real,
+        proxy_pass     => [
+          {
+            path => '/synchrony',
+            url  => "http://${alias}.${domain}:8091/synchrony",
+          },
+        ],
+        directories => [
+          {
+            path    => '/var/www/html/',
+            options => [
+              'Indexes',
+              'FollowSymLinks',
+              'MultiViews',
+            ],
+          },
+          {
+            path     => '/synchrony',
+            provider => 'location',
+            rewrites => [
+              {
+                rewrite_cond => [
+                  '%{HTTP:UPGRADE} ^WebSocket$ [NC]',
+                  '%{HTTP:CONNECTION} ^Upgrade$ [NC]',
+                ],
+              },
+              {
+                rewrite_rule => [
+                  ".* ws://${alias}.${domain}:8091%{REQUEST_URI} [P]"
+                ]
+              },
+            ],
+          }
+        ],
       }
     } else {
       fail("${proxy_provider} is not a valid proxy provider.")

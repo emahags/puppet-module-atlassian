@@ -15,18 +15,8 @@
                    scheme="https"
                    proxyPort="<%= @proxy_ssl_port %>"
                    secure="true"
+                   proxyName="<%= @alias %>.<%= @domain %>"
 <% end -%>
-        />
-
-        <Connector port="8091"
-                   connectionTimeout="20000"
-                   maxThreads="200"
-                   minSpareThreads="10"
-                   enableLookups="false"
-                   acceptCount="10"
-                   debug="0"
-                   URIEncoding="UTF-8"
-                   protocol="org.apache.coyote.http11.Http11NioProtocol"
         />
 
         <Engine name="Standalone" defaultHost="localhost" debug="0">
