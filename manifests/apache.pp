@@ -12,12 +12,12 @@ define atlassian::apache(
   include ::atlassian::apache::setup
 
   $proxy_pass_real = concat(
+    $proxy_pass,
     [
       { 'path' => '/',
         'url' => "http://${server_alias}.${domain}:${port}/",
       },
-    ],
-    $proxy_pass
+    ]
   )
 
   if $proxy_ssl {
